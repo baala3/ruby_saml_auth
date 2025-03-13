@@ -16,6 +16,11 @@ Router.draw do
     [200, {'Content-Type' => 'text/css'}, [content]]
   }
 
+  get('/favicon.svg') {
+    content = File.read('public/favicon.svg')
+    [200, {'Content-Type' => 'image/svg+xml'}, [content]]
+  }
+
   # Dynamic routes
   get('/acs') {
     [200, {'Content-Type' => 'text/html'}, ["successfully authenticated"]]
