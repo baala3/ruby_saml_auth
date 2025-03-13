@@ -8,6 +8,6 @@
 	ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
 	Version="2.0">
 	<saml2:Issuer
-		xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">{{HOST}}/rack_okta_saml
+		xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">{{HOST}}/{{ISSUER}}
 	</saml2:Issuer>
 </saml2p:AuthnRequest>
