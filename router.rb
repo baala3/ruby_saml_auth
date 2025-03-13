@@ -12,6 +12,9 @@ class Router
 
   def initialize
     @routes = {}
+    @static_paths = {
+      '/' => 'public/index.html'
+    }
   end
 
   def get(path, &blk)
@@ -19,7 +22,13 @@ class Router
   end
 
   def build_response(path)
-    handler = @routes[path] || -> { "no route found for #{path}" }
-    handler.call
+    case
+    when @static_paths.key?(path)
+      File.read(@static_paths[path])
+    when @routes.key?(path)
+      @routes[path].call
+    else
+      "no route found for #{path}"
+    end
   end
 end
