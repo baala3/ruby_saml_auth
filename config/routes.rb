@@ -22,6 +22,8 @@ Router.draw do
   }
 
   # Dynamic routes
+
+  # note: acs should be either GET or POST and here `get` method is handling all requests to /acs,(i.e. GET, POST, etc. because we only check request path not request method)
   get('/acs') {
     [200, {'Content-Type' => 'text/html'}, ["successfully authenticated"]]
   }
