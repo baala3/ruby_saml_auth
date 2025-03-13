@@ -1,6 +1,15 @@
 # weby/router.rb
+require "singleton"
 
 class Router
+  include Singleton
+
+  class << self
+    def draw(&blk)
+      Router.instance.instance_exec(&blk)
+    end
+  end
+
   def initialize
     @routes = {}
   end
