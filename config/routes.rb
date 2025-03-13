@@ -1,6 +1,12 @@
 require_relative '../router'
 
+# make sure to return an array from all routes
 Router.draw do
-  get('/') { "Hello World!" }
-  get('/acs') { "successfully authenticated" } #saml assertion consumer service
+  get('/') {
+    [200, {'Content-Type' => 'text/html'}, ["Hello World!"]]
+  }
+
+  get('/acs') {
+    [200, {'Content-Type' => 'text/html'}, ["successfully authenticated"]]
+  }
 end
