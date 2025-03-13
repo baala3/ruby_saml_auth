@@ -18,9 +18,10 @@ class Router
     @routes[path] = blk
   end
 
-  def build_response(path)
+  def build_response(env)
+    path = env['PATH_INFO']
     if @routes.key?(path)
-      @routes[path].call
+      @routes[path].call(env)
     else
       [404, {'Content-Type' => 'text/html'}, ["no route found for #{path}"]]
     end

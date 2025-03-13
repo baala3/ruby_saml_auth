@@ -35,6 +35,7 @@ Router.draw do
       .gsub('{{HOST}}', ENV['HOST'])
       .gsub('{{OKTA_DOMAIN}}', ENV['OKTA_DOMAIN'])
       .gsub('{{OKTA_APP_PATH}}', ENV['OKTA_APP_PATH'])
+      .gsub('{{ISSUER}}', ENV['ISSUER'])
 
     # Deflate and encode
     deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)[2..-5]
