@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<saml2p:AuthnRequest
+	xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
+	AssertionConsumerServiceURL="{{HOST}}/acs"
+	Destination="https://{{OKTA_DOMAIN}}/{{OKTA_APP_PATH}}"
+	ID="unique-generated-id-1234"
+	IssueInstant="2025-03-12T18:41:20.295Z"
+	ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+	Version="2.0">
+	<saml2:Issuer
+		xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion">{{HOST}}/rack_okta_saml
+	</saml2:Issuer>
+</saml2p:AuthnRequest>
