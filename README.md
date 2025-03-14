@@ -12,14 +12,6 @@ A minimal Ruby implementation of SAML Single Sign-On (SSO) with Okta as the Iden
 ### Local Setup
 
 1. Clone the repository
-2. load env
-
-```
-   SP_ACS_URL=your-sp-acs-endpoint # shoud handle POST
-   IDP_SSO_TARGET_URL=your-idp-sso-endpoint
-   SP_ENTITY_ID=entity-id-of-issuer
-```
-
-3. Add IDp certificate to cart/okta_cert.pem
-
-4. Start the server (ie, run `puma`)
+2. set `IDP_SSO_TARGET_URL` (of any IDp okta/azure_ad)
+3. Add `IDP certificate` to `cert/okta_cert.pem`
+4. Start the server using puma-dev (i.e, run `make run`)
