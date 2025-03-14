@@ -1,4 +1,6 @@
-require_relative './config/routes'
+# frozen_string_literal: true
+
+require_relative 'config/routes'
 
 class App
   def call(env)

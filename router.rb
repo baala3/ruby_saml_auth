@@ -1,12 +1,13 @@
-# weby/router.rb
-require "singleton"
+# frozen_string_literal: true
+
+require 'singleton'
 
 class Router
   include Singleton
 
   class << self
-    def draw(&blk)
-      Router.instance.instance_exec(&blk)
+    def draw(&)
+      Router.instance.instance_exec(&)
     end
   end
 
@@ -23,7 +24,7 @@ class Router
     if @routes.key?(path)
       @routes[path].call(env)
     else
-      [404, {'Content-Type' => 'text/html'}, ["no route found for #{path}"]]
+      [404, { 'Content-Type' => 'text/html' }, ["no route found for #{path}"]]
     end
   end
 end
