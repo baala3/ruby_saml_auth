@@ -40,7 +40,21 @@ class SamlHandler
   def self.log_saml_response(form_data)
     content = if form_data.key?("SAMLResponse")
       decoded_response = Base64.decode64(form_data["SAMLResponse"])
-      formatted_xml = Nokogiri::XML(decoded_response).to_xml(indent: 2)
+      doc = Nokogiri::XML(decoded_response)
+
+      # Define namespaces
+      namespaces = {
+      'saml2' => 'urn:oasis:names:tc:SAML:2.0:assertion',
+      'ds' => 'http://www.w3.org/2000/09/xmldsig#'
+      }
+
+      # Hide sensitive data
+      doc.xpath('//saml2:NameID', namespaces).each { |node| node.content = '[REDACTED]' }
+      doc.xpath('//saml2:AttributeValue', namespaces).each { |node| node.content = '[REDACTED]' }
+      doc.xpath('//ds:X509Certificate', namespaces).each { |node| node.content = '[REDACTED]' }
+      doc.xpath('//ds:SignatureValue', namespaces).each { |node| node.content = '[REDACTED]' }
+
+      doc.to_xml(indent: 2)
     else
       "No SAMLResponse found in the request"
     end
