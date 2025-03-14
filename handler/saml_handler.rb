@@ -25,6 +25,7 @@ class SamlHandler
 
   def self.handle_acs(env)
     form_data = URI.decode_www_form(env['rack.input'].read).to_h
+    log_saml_response(form_data) # for debugging purposes
     is_valid, message = is_valid_saml_response(form_data, File.read('./cert/okta_cert.pem'))
 
     if !is_valid
@@ -35,6 +36,16 @@ class SamlHandler
   end
 
   private
+
+  def self.log_saml_response(form_data)
+    content = if form_data.key?("SAMLResponse")
+      decoded_response = Base64.decode64(form_data["SAMLResponse"])
+      formatted_xml = Nokogiri::XML(decoded_response).to_xml(indent: 2)
+    else
+      "No SAMLResponse found in the request"
+    end
+    File.write("xml/saml_response.xml", content)
+  end
 
   def self.is_valid_saml_response(form_data, certificate)
   return [false, "SAMLResponse is required"] unless form_data.key?("SAMLResponse")
