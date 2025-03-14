@@ -2,9 +2,16 @@ GEM
   remote: https://rubygems.org/
   specs:
     dotenv (2.8.1)
+    mini_portile2 (2.8.8)
     nio4r (2.7.4)
+    nokogiri (1.18.3)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    nokogiri (1.18.3-arm64-darwin)
+      racc (~> 1.4)
     puma (6.6.0)
       nio4r (~> 2.0)
+    racc (1.8.1)
     rack (3.1.12)
 
 PLATFORMS
@@ -13,6 +20,7 @@ PLATFORMS
 
 DEPENDENCIES
   dotenv (~> 2.8)
+  nokogiri (~> 1.18)
   puma (~> 6.6)
   rack (~> 3.1)
 
