@@ -20,4 +20,6 @@ A minimal Ruby implementation of SAML Single Sign-On (SSO) with Okta as the Iden
    SP_ENTITY_ID=entity-id-of-issuer
 ```
 
-3. Start the server (ie, run `puma`)
+3. Add IDp certificate to cart/okta_cert.pem
+
+4. Start the server (ie, run `puma`)

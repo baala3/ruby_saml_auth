@@ -5,6 +5,7 @@ require 'openssl'
 require 'nokogiri'
 require 'time'
 require 'zlib'
+require 'securerandom'
 
 class SamlHandler
   def self.handle_auth_request
@@ -14,6 +15,8 @@ class SamlHandler
                    .gsub('{{SP_ACS_URL}}', ENV.fetch('SP_ACS_URL', nil))
                    .gsub('{{SP_ENTITY_ID}}', ENV.fetch('SP_ENTITY_ID', nil))
                    .gsub('{{IDP_SSO_TARGET_URL}}', ENV.fetch('IDP_SSO_TARGET_URL', nil))
+                   .gsub('{{UNIQUE_ID}}', "id-#{SecureRandom.uuid}")
+                   .gsub('{{ISSUE_INSTANT}}', Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ'))
     # Deflate and encode
     deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)[2..-5]
     base64_request = Base64.strict_encode64(deflated_request)

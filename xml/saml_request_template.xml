@@ -3,8 +3,8 @@
 	xmlns:saml2p="urn:oasis:names:tc:SAML:2.0:protocol"
 	AssertionConsumerServiceURL="{{SP_ACS_URL}}"
 	Destination="{{IDP_SSO_TARGET_URL}}"
-	ID="unique-generated-id-1234"
-	IssueInstant="2025-03-12T18:41:20.295Z"
+	ID="{{UNIQUE_ID}}"
+	IssueInstant="{{ISSUE_INSTANT}}"
 	ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
 	Version="2.0">
 	<saml2:Issuer
