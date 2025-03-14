@@ -39,33 +39,32 @@ class SamlHandler
   end
 
   def self.log_saml_response(form_data)
-    content = if form_data.key?('SAMLResponse')
-                decoded_response = Base64.decode64(form_data['SAMLResponse'])
-                doc = Nokogiri::XML(decoded_response)
+    if form_data.key?('SAMLResponse')
+      decoded_response = Base64.decode64(form_data['SAMLResponse'])
+      doc = Nokogiri::XML(decoded_response)
 
-                # Define namespaces
-                namespaces = {
-                  'saml2' => 'urn:oasis:names:tc:SAML:2.0:assertion',
-                  'ds' => 'http://www.w3.org/2000/09/xmldsig#'
-                }
+      # Define namespaces
+      namespaces = {
+        'saml2' => 'urn:oasis:names:tc:SAML:2.0:assertion',
+        'ds' => 'http://www.w3.org/2000/09/xmldsig#'
+      }
 
-                # Hide sensitive data
-                doc.xpath('//saml2:NameID', namespaces).each { |node| node.content = '[REDACTED]' }
-                doc.xpath('//saml2:AttributeValue', namespaces).each do |node|
-                  node.content = '[REDACTED]'
-                end
-                doc.xpath('//ds:X509Certificate', namespaces).each do |node|
-                  node.content = '[REDACTED]'
-                end
-                doc.xpath('//ds:SignatureValue', namespaces).each do |node|
-                  node.content = '[REDACTED]'
-                end
+      # Hide sensitive data
+      doc.xpath('//saml2:NameID', namespaces).each { |node| node.content = '[REDACTED]' }
+      doc.xpath('//saml2:AttributeValue', namespaces).each do |node|
+        node.content = '[REDACTED]'
+      end
+      doc.xpath('//ds:X509Certificate', namespaces).each do |node|
+        node.content = '[REDACTED]'
+      end
+      doc.xpath('//ds:SignatureValue', namespaces).each do |node|
+        node.content = '[REDACTED]'
+      end
 
-                doc.to_xml(indent: 2)
-              else
-                'No SAMLResponse found in the request'
-              end
-    File.write('xml/saml_response.xml', content)
+      File.write('xml/saml_response.xml', doc.to_xml(indent: 2))
+    else
+      File.write('xml/saml_response.xml', 'No SAMLResponse found in the request')
+    end
   end
 
   def self.validate_saml_response(form_data, certificate)
@@ -95,6 +94,10 @@ class SamlHandler
     is_valid_assertion_sig = verify_signature(assertion_signature, cert)
     return is_valid_assertion_sig unless is_valid_assertion_sig[0]
 
+    verify_assertion_timestamps_and_audience(assertion)
+  end
+
+  def self.verify_assertion_timestamps_and_audience(assertion)
     # Verify conditions (timestamps)
     conditions = assertion.at_xpath('.//saml:Conditions',
                                     'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
