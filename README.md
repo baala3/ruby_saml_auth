@@ -15,10 +15,9 @@ A minimal Ruby implementation of SAML Single Sign-On (SSO) with Okta as the Iden
 2. load env
 
 ```
-   HOST=http://localhost:9292
-   OKTA_DOMAIN=your-domain.okta.com
-   OKTA_APP_PATH=app/your-app-path/sso/saml
-   ISSUER=your-app-name
+   SP_ACS_URL=your-sp-acs-endpoint # shoud handle POST
+   IDP_SSO_TARGET_URL=your-idp-sso-endpoint
+   SP_ENTITY_ID=entity-id-of-issuer
 ```
 
 3. Start the server (ie, run `puma`)

@@ -9,17 +9,15 @@ class SamlHandler
     # Read and process the template
     template = File.read('xml/saml_request_template.xml')
     saml_request = template
-      .gsub('{{HOST}}', ENV['HOST'])
-      .gsub('{{OKTA_DOMAIN}}', ENV['OKTA_DOMAIN'])
-      .gsub('{{OKTA_APP_PATH}}', ENV['OKTA_APP_PATH'])
-      .gsub('{{ISSUER}}', ENV['ISSUER'])
-
+      .gsub('{{SP_ACS_URL}}', ENV['SP_ACS_URL'])
+      .gsub('{{SP_ENTITY_ID}}', ENV['SP_ENTITY_ID'])
+      .gsub('{{IDP_SSO_TARGET_URL}}', ENV['IDP_SSO_TARGET_URL'])
     # Deflate and encode
     deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)[2..-5]
     base64_request = Base64.strict_encode64(deflated_request)
     encoded_request = URI.encode_www_form_component(base64_request)
 
-    redirect_url = "https://#{ENV['OKTA_DOMAIN']}/#{ENV['OKTA_APP_PATH']}?SAMLRequest=#{encoded_request}"
+    redirect_url = "#{ENV['IDP_SSO_TARGET_URL']}?SAMLRequest=#{encoded_request}"
     [302, {'Location' => redirect_url}, []]
   end
 
@@ -108,8 +106,8 @@ class SamlHandler
   # Verify Audience (optional but recommended)
   audience = conditions.at_xpath('.//saml:AudienceRestriction/saml:Audience',
     'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
-  if audience && audience.text != ENV['HOST'] + '/' + ENV['ISSUER']
-    return [false, "Invalid Audience. Expected: #{ENV['HOST']}/#{ENV['ISSUER']}, Got: #{audience.text}"]
+  if audience && audience.text != ENV['SP_ENTITY_ID']
+    return [false, "Invalid Audience. Expected: #{ENV['SP_ENTITY_ID']}, Got: #{audience.text}"]
   end
 
   # Verify Subject (optional but recommended)
