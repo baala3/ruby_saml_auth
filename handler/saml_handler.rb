@@ -40,6 +40,9 @@ class SamlHandler
 
     return [400, { 'Content-Type' => 'text/html' }, [result]] unless success
 
+    # Validate the SAML response
+    validate_saml_response(result, File.read('./cert/certificate.crt'))
+
     [200, { 'Content-Type' => 'text/html' }, ['successfully authenticated']]
   end
 
@@ -92,11 +95,8 @@ class SamlHandler
     end
   end
 
-  def self.validate_saml_response(form_data, certificate)
-    return [false, 'SAMLResponse is required'] unless form_data.key?('SAMLResponse')
-
-    decoded_response = Base64.decode64(form_data['SAMLResponse'])
-    xml_doc = Nokogiri::XML(decoded_response)
+  def self.validate_saml_response(decrypted_xml, certificate)
+    xml_doc = Nokogiri::XML(decrypted_xml)
     cert = OpenSSL::X509::Certificate.new(certificate)
 
     # First verify the response signature
