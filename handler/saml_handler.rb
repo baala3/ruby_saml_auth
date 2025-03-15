@@ -32,13 +32,25 @@ class SamlHandler
     form_data = URI.decode_www_form(env['rack.input'].read).to_h
     log_saml_response(form_data)
 
-    # Pass the encrypted SAML response
-    success, result = decrypt_assertion(
-      Base64.decode64(form_data['SAMLResponse']),
-      './cert/private.key'
-    )
+    result = nil
 
-    return [400, { 'Content-Type' => 'text/html' }, [result]] unless success
+    # Get the base64 decoded SAML response
+    saml_response = Base64.decode64(form_data['SAMLResponse'])
+
+    # Handle encrypted assertion if configured
+    if ENV['IS_ASSERTION_ENCRYPTED'] == 'true'
+      success, decrypted_xml = decrypt_assertion(
+        saml_response,
+        './cert/private.key'
+      )
+
+      return [400, { 'Content-Type' => 'text/html' }, ["Decryption failed: #{decrypted_xml}"]] unless success
+
+      result = decrypted_xml
+
+    else
+      result = saml_response
+    end
 
     # Validate the SAML response
     validate_saml_response(result, File.read('./cert/certificate.crt'))

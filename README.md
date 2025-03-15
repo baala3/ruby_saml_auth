@@ -37,10 +37,10 @@ IDP_ENTITY_ID=<IDP-entity-id>
    - Download the Okta certificate from your Okta SAML application settings.
    - Save it as cert/okta_cert.pem.
 
-5. Generate Private Key and Certificate:
-
+5. If you want SAML assertion to be encrypted then follow this step:
    - Run the following command to generate a private key and certificate.
    - Upload the generated certificate.crt to your Okta SAML application settings for assertion encryption.
+   - and set `IS_ASSERTION_ENCRYPTED` to `true`
 
 ```
 openssl req -x509 -nodes -sha256 -days 3650 -newkey rsa:2048 -keyout cert/private.key -out cert/certificate.crt
