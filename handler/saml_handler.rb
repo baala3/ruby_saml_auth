@@ -6,6 +6,8 @@ require 'nokogiri'
 require 'time'
 require 'zlib'
 require 'securerandom'
+require 'ruby-saml'
+require 'xmlenc'
 
 class SamlHandler
   def self.handle_auth_request
@@ -28,40 +30,63 @@ class SamlHandler
 
   def self.handle_acs(env)
     form_data = URI.decode_www_form(env['rack.input'].read).to_h
-    log_saml_response(form_data) # for debugging purposes
-    is_valid, message = validate_saml_response(form_data, File.read('./cert/okta_cert.pem'))
+    log_saml_response(form_data)
 
-    if is_valid
-      [200, { 'Content-Type' => 'text/html' }, ['successfully authenticated']]
-    else
-      [400, { 'Content-Type' => 'text/html' }, [message]]
-    end
+    # Pass the encrypted SAML response
+    success, result = decrypt_assertion(
+      Base64.decode64(form_data['SAMLResponse']),
+      './cert/private.key'
+    )
+
+    return [400, { 'Content-Type' => 'text/html' }, [result]] unless success
+
+    [200, { 'Content-Type' => 'text/html' }, ['successfully authenticated']]
+  end
+
+  def self.decrypt_assertion(saml_response, private_key_path)
+    # Parse the SAML response
+    doc = Nokogiri::XML(saml_response)
+
+    # Load private key as OpenSSL key object
+    private_key = OpenSSL::PKey::RSA.new(File.read(private_key_path))
+
+    # Get the encrypted assertion
+    encrypted_assertion = doc.at_xpath('//saml2:EncryptedAssertion',
+                                       'saml2' => 'urn:oasis:names:tc:SAML:2.0:assertion')
+    return [false, 'No encrypted assertion found'] unless encrypted_assertion
+
+    # Get encrypted key node
+    encrypted_key = encrypted_assertion.at_xpath('.//xenc:EncryptedKey',
+                                                 'xenc' => 'http://www.w3.org/2001/04/xmlenc#')
+    return [false, 'No encrypted key found'] unless encrypted_key
+
+    # Get encrypted data node
+    encrypted_data = encrypted_assertion.at_xpath('.//xenc:EncryptedData',
+                                                  'xenc' => 'http://www.w3.org/2001/04/xmlenc#')
+    return [false, 'No encrypted data found'] unless encrypted_data
+
+    # First decrypt the key
+    key_cipher = Xmlenc::EncryptedKey.new(encrypted_key)
+    decrypted_key = key_cipher.decrypt(private_key)
+
+    # Then decrypt the data with the decrypted key
+    encryption = Xmlenc::EncryptedData.new(encrypted_data)
+    decrypted_xml = encryption.decrypt(decrypted_key)
+
+    [true, decrypted_xml]
+  rescue OpenSSL::Cipher::CipherError => e
+    [false, "Failed to decrypt: #{e.message}"]
+  rescue OpenSSL::PKey::RSAError => e
+    [false, "Key error: #{e.message}"]
+  rescue StandardError => e
+    [false, "Decryption failed: #{e.message}"]
   end
 
   def self.log_saml_response(form_data)
     if form_data.key?('SAMLResponse')
       decoded_response = Base64.decode64(form_data['SAMLResponse'])
-      doc = Nokogiri::XML(decoded_response)
-
-      # Define namespaces
-      namespaces = {
-        'saml2' => 'urn:oasis:names:tc:SAML:2.0:assertion',
-        'ds' => 'http://www.w3.org/2000/09/xmldsig#'
-      }
-
-      # Hide sensitive data
-      doc.xpath('//saml2:NameID', namespaces).each { |node| node.content = '[REDACTED]' }
-      doc.xpath('//saml2:AttributeValue', namespaces).each do |node|
-        node.content = '[REDACTED]'
-      end
-      doc.xpath('//ds:X509Certificate', namespaces).each do |node|
-        node.content = '[REDACTED]'
-      end
-      doc.xpath('//ds:SignatureValue', namespaces).each do |node|
-        node.content = '[REDACTED]'
-      end
-
-      File.write('xml/saml_response.xml', doc.to_xml(indent: 2))
+      doc = Nokogiri::XML(decoded_response).to_xml(indent: 2)
+      File.write('xml/saml_response.xml', doc)
     else
       File.write('xml/saml_response.xml', 'No SAMLResponse found in the request')
     end
