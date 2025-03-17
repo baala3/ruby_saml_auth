@@ -59,17 +59,13 @@ class SamlHandler
     doc = Nokogiri::XML(result)
     user_attributes = extract_user_attributes(doc)
 
-    # Set cookies with user information
-    headers = {
-      'Location' => '/home',
-      'Set-Cookie' => [
-        "email=#{URI.encode_www_form_component(user_attributes[:email])}; Path=/; SameSite=Strict",
-        "first_name=#{URI.encode_www_form_component(user_attributes[:first_name])}; Path=/; SameSite=Strict",
-        "last_name=#{URI.encode_www_form_component(user_attributes[:last_name])}; Path=/; SameSite=Strict"
-      ]
-    }
+    # Store user information in session
+    session = env['rack.session']
+    session[:email] = user_attributes[:email]
+    session[:first_name] = user_attributes[:first_name]
+    session[:last_name] = user_attributes[:last_name]
 
-    [302, headers, []]
+    [302, { 'Location' => '/home' }, []]
   end
 
   def self.decrypt_assertion(saml_response, private_key_path)

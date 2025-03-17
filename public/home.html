@@ -77,71 +77,21 @@
         <div class="user-info">
           <div class="info-row">
             <div class="info-label">Email:</div>
-            <div id="email" class="info-value"></div>
+            <div class="info-value">{{email}}</div>
           </div>
           <div class="info-row">
             <div class="info-label">First Name:</div>
-            <div id="firstName" class="info-value"></div>
+            <div class="info-value">{{first_name}}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Last Name:</div>
-            <div id="lastName" class="info-value"></div>
+            <div class="info-value">{{last_name}}</div>
           </div>
         </div>
-        <form
-          action="/logout"
-          method="post"
-          onsubmit="return handleLogout(event)"
-        >
+        <form action="/logout" method="post">
           <button type="submit" class="logout-button">Logout</button>
         </form>
       </div>
     </div>
-
-    <script>
-      // Function to get cookie value by name
-      function getCookie(name) {
-        const cookies = document.cookie.split(";");
-        console.log(cookies);
-        for (let cookie of cookies) {
-          const [cookieName, cookieValue] = cookie.trim().split("=");
-          if (cookieName === name) {
-            return decodeURIComponent(cookieValue);
-          }
-        }
-        return "";
-      }
-
-      // Function to handle logout
-      function handleLogout(event) {
-        event.preventDefault();
-
-        // Clear cookies
-        document.cookie =
-          "email=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        document.cookie =
-          "first_name=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-        document.cookie =
-          "last_name=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-
-        // Redirect to login page
-        window.location.reload();
-        return false;
-      }
-
-      // Load user information from cookies
-      window.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("email").textContent = getCookie("email");
-        document.getElementById("firstName").textContent =
-          getCookie("first_name");
-        document.getElementById("lastName").textContent =
-          getCookie("last_name");
-
-        // Redirect to login if no email cookie is found
-        if (!getCookie("email")) {
-          window.location.href = "/";
-        }
-      });
-    </script>
   </body>
 </html>
