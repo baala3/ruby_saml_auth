@@ -10,14 +10,18 @@ require 'ruby-saml'
 require 'xmlenc'
 
 class SamlHandler
-  def self.handle_auth_request
+  def self.handle_auth_request(env)
     # Read and process the template
-    template = File.read('xml/saml_request_template.xml')
+    saml_request_id = "id-#{SecureRandom.uuid}"
+    session = env['rack.session']
+    session[:saml_request_id] = saml_request_id
+
+    template = File.read('xml/saml_sso_request_template.xml')
     saml_request = template
                    .gsub('{{SP_ACS_URL}}', ENV.fetch('SP_ACS_URL', nil))
                    .gsub('{{SP_ENTITY_ID}}', ENV.fetch('SP_ENTITY_ID', nil))
                    .gsub('{{IDP_SSO_TARGET_URL}}', ENV.fetch('IDP_SSO_TARGET_URL', nil))
-                   .gsub('{{UNIQUE_ID}}', "id-#{SecureRandom.uuid}")
+                   .gsub('{{UNIQUE_ID}}', saml_request_id)
                    .gsub('{{ISSUE_INSTANT}}', Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ'))
     # Deflate and encode
     deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)[2..-5]
@@ -64,8 +68,13 @@ class SamlHandler
     session[:email] = user_attributes[:email]
     session[:first_name] = user_attributes[:first_name]
     session[:last_name] = user_attributes[:last_name]
+    session[:name_id] = user_attributes[:name_id]
 
     [302, { 'Location' => '/home' }, []]
+  end
+
+  def self.handle_logout_callback(env)
+    [200, { 'Content-Type' => 'text/html' }, ['logout callback']]
   end
 
   def self.decrypt_assertion(saml_response, private_key_path)
@@ -222,13 +231,18 @@ class SamlHandler
 
   def self.extract_user_attributes(doc)
     assertion = doc.at_xpath('//saml:Assertion', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
+
+    # Extract NameID
+    name_id = assertion.at_xpath('.//saml:NameID', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.text
+
     attribute_statement = assertion.at_xpath('.//saml:AttributeStatement',
                                              'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
 
     attributes = {
       email: '',
       first_name: '',
-      last_name: ''
+      last_name: '',
+      name_id: name_id # Add NameID to attributes
     }
 
     attribute_statement&.xpath('.//saml:Attribute', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.each do |attr|

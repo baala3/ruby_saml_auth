@@ -13,11 +13,12 @@ Router.draw do
   get('/favicon.svg') { StaticFileHandler.serve_file('public/favicon.svg', 'image/svg+xml') }
 
   # SAML routes
-  get('/auth/saml') { SamlHandler.handle_auth_request }
+  get('/auth/saml') { |env| SamlHandler.handle_auth_request(env) }
   # NOTE: acs should be POST and here `get` method is also handling POST
   get('/acs') { |env| SamlHandler.handle_acs(env) }
 
   # protected routes
   get('/home') { |env| SessionHandler.handle_home(env) }
   get('/logout') { |env| SessionHandler.handle_logout(env) }
+  get('/logout/callback') { |env| SamlHandler.handle_logout_callback(env) }
 end
