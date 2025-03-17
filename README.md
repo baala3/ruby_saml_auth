@@ -19,19 +19,7 @@ cd saml-sso-ruby
 ```
 
 2. Install Dependencies with `bundle install`.
-3. Set Environment Variables:
-
-```
-## SP
-SP_HOST=<sp-host>
-SP_ACS_URL=<sp-acs-endpoint>
-SP_ENTITY_ID=<sp-enitiy-id> # project-name/any string that identifies app
-
-## IDP
-IDP_SSO_TARGET_URL=<IDP-sso-url>
-IDP_ENTITY_ID=<IDP-entity-id>
-```
-
+3. Load & configure Environment Variables `touch .env && cat .env.example > .env`
 4. Create IDP from okta developer dashboard
 
    - Download the Okta certificate from your Okta SAML application settings.
