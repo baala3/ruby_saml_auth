@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome - SAML Authentication</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f7fa;
+        color: #2d3748;
+      }
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+      .header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .header h1 {
+        margin: 0;
+        color: #1a365d;
+        font-size: 1.8rem;
+      }
+      .user-info {
+        margin-bottom: 2rem;
+      }
+      .info-row {
+        display: flex;
+        margin-bottom: 1rem;
+      }
+      .info-label {
+        width: 120px;
+        font-weight: 600;
+        color: #4a5568;
+      }
+      .info-value {
+        color: #2d3748;
+        flex: 1;
+      }
+      .logout-button {
+        display: inline-block;
+        background-color: #e53e3e;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .logout-button:hover {
+        background-color: #c53030;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <div class="header">
+          <h1>Welcome!</h1>
+        </div>
+        <div class="user-info">
+          <div class="info-row">
+            <div class="info-label">Email:</div>
+            <div id="email" class="info-value"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">First Name:</div>
+            <div id="firstName" class="info-value"></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Last Name:</div>
+            <div id="lastName" class="info-value"></div>
+          </div>
+        </div>
+        <form
+          action="/logout"
+          method="post"
+          onsubmit="return handleLogout(event)"
+        >
+          <button type="submit" class="logout-button">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Function to get cookie value by name
+      function getCookie(name) {
+        const cookies = document.cookie.split(";");
+        console.log(cookies);
+        for (let cookie of cookies) {
+          const [cookieName, cookieValue] = cookie.trim().split("=");
+          if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+          }
+        }
+        return "";
+      }
+
+      // Function to handle logout
+      function handleLogout(event) {
+        event.preventDefault();
+
+        // Clear cookies
+        document.cookie =
+          "email=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        document.cookie =
+          "first_name=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        document.cookie =
+          "last_name=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+
+        // Redirect to login page
+        window.location.reload();
+        return false;
+      }
+
+      // Load user information from cookies
+      window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("email").textContent = getCookie("email");
+        document.getElementById("firstName").textContent =
+          getCookie("first_name");
+        document.getElementById("lastName").textContent =
+          getCookie("last_name");
+
+        // Redirect to login if no email cookie is found
+        if (!getCookie("email")) {
+          window.location.href = "/";
+        }
+      });
+    </script>
+  </body>
+</html>

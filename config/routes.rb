@@ -10,6 +10,7 @@ Router.draw do
   get('/') { StaticFileHandler.serve_file('public/index.html', 'text/html') }
   get('/styles.css') { StaticFileHandler.serve_file('public/styles.css', 'text/css') }
   get('/favicon.svg') { StaticFileHandler.serve_file('public/favicon.svg', 'image/svg+xml') }
+  get('/home') { StaticFileHandler.serve_file('public/home.html', 'text/html') }
 
   # SAML routes
   get('/auth/saml') { SamlHandler.handle_auth_request }

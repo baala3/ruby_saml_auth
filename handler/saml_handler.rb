@@ -55,7 +55,21 @@ class SamlHandler
     # Validate the SAML response
     validate_saml_response(result, File.read('./cert/certificate.crt'))
 
-    [200, { 'Content-Type' => 'text/html' }, ['successfully authenticated']]
+    # Extract user attributes from the SAML response
+    doc = Nokogiri::XML(result)
+    user_attributes = extract_user_attributes(doc)
+
+    # Set cookies with user information
+    headers = {
+      'Location' => '/home',
+      'Set-Cookie' => [
+        "email=#{URI.encode_www_form_component(user_attributes[:email])}; Path=/; SameSite=Strict",
+        "first_name=#{URI.encode_www_form_component(user_attributes[:first_name])}; Path=/; SameSite=Strict",
+        "last_name=#{URI.encode_www_form_component(user_attributes[:last_name])}; Path=/; SameSite=Strict"
+      ]
+    }
+
+    [302, headers, []]
   end
 
   def self.decrypt_assertion(saml_response, private_key_path)
@@ -208,5 +222,33 @@ class SamlHandler
     # and transform handling. This should be implemented properly in a production environment
     # for full security compliance with SAML 2.0 specifications.
     true
+  end
+
+  def self.extract_user_attributes(doc)
+    assertion = doc.at_xpath('//saml:Assertion', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
+    attribute_statement = assertion.at_xpath('.//saml:AttributeStatement',
+                                             'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
+
+    attributes = {
+      email: '',
+      first_name: '',
+      last_name: ''
+    }
+
+    attribute_statement&.xpath('.//saml:Attribute', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.each do |attr|
+      name = attr['Name']
+      value = attr.at_xpath('.//saml:AttributeValue', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.text
+
+      case name.downcase
+      when 'email', 'emailaddress', 'mail'
+        attributes[:email] = value
+      when 'firstname', 'givenname'
+        attributes[:first_name] = value
+      when 'lastname', 'surname'
+        attributes[:last_name] = value
+      end
+    end
+
+    attributes
   end
 end
