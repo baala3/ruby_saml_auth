@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module SamlHelper
+  ## SSO Helpers
   def log_saml_response(form_data)
     if form_data.key?('SAMLResponse')
       decoded_response = Base64.decode64(form_data['SAMLResponse'])
@@ -115,6 +116,21 @@ module SamlHelper
     session[:first_name] = attributes[:first_name]
     session[:last_name] = attributes[:last_name]
     session[:name_id] = attributes[:name_id]
+  end
+
+  ## SLO Helpers
+  def encoded_saml_request(saml_request)
+    deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)
+    base64_request = Base64.strict_encode64(deflated_request)
+    CGI.escape(base64_request)
+  end
+
+  def sign_saml_request(encoded_saml_request, sig_alg)
+    private_key = OpenSSL::PKey::RSA.new(File.read('cert/private.key'))
+    string_to_sign = "SAMLRequest=#{encoded_saml_request}&SigAlg=#{CGI.escape(sig_alg)}"
+    signature = private_key.sign(OpenSSL::Digest.new('SHA256'), string_to_sign)
+
+    CGI.escape(Base64.strict_encode64(signature))
   end
 
   private

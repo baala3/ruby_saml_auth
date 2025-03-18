@@ -86,24 +86,4 @@ class SamlHandler
 
     [302, { 'Location' => redirect_url }, []]
   end
-
-  def self.encoded_saml_request(saml_request)
-    deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)
-    base64_request = Base64.strict_encode64(deflated_request)
-    CGI.escape(base64_request)
-  end
-
-  def self.sign_saml_request(encoded_saml_request, sig_alg)
-    private_key = OpenSSL::PKey::RSA.new(File.read('cert/private.key'))
-    string_to_sign = "SAMLRequest=#{encoded_saml_request}&SigAlg=#{CGI.escape(sig_alg)}"
-    signature = private_key.sign(OpenSSL::Digest.new('SHA256'), string_to_sign)
-
-    CGI.escape(Base64.strict_encode64(signature))
-  end
-
-  def self.handle_normal_logout(env)
-    session = env['rack.session']
-    session.clear
-    [302, { 'Location' => '/' }, []]
-  end
 end
