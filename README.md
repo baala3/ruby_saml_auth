@@ -18,15 +18,15 @@ git clone https://github.com/your-repo/saml-sso-ruby.git
 cd saml-sso-ruby
 ```
 
-2. Install Dependencies with `bundle install`.
+2. Install Dependencies with `make setup`.
 3. Load & configure Environment Variables `touch .env && cat .env.example > .env`
-4. Create IDP from okta developer dashboard
+4. Create IDP on okta developer dashboard
 
    - Download the Okta certificate from your Okta SAML application settings.
    - Save it as cert/okta_cert.pem.
 
 5. If you want SAML assertion to be encrypted then follow this step:
-   - Run the following command to generate a private key and certificate.
+   - Run the below command to generate a private key and certificate.
    - Upload the generated certificate.crt to your Okta SAML application settings for assertion encryption.
    - and set `IS_ASSERTION_ENCRYPTED` to `true`
 
