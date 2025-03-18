@@ -9,6 +9,7 @@ require 'securerandom'
 require 'ruby-saml'
 require 'xmlenc'
 require_relative '../helpers/saml_helper'
+require 'cgi'
 
 class SamlHandler
   extend SamlHelper
@@ -61,7 +62,48 @@ class SamlHandler
     [302, { 'Location' => '/home' }, []]
   end
 
-  def self.handle_logout_callback(_)
-    [200, { 'Content-Type' => 'text/html' }, ['logout callback']]
+  def self.handle_logout_request(env)
+    session = env['rack.session']
+    # Read and process template
+    template = File.read('xml/saml_slo_request_template.xml')
+
+    saml_request = template
+                   .gsub('{{IDP_LOGOUT_URL}}', ENV.fetch('IDP_LOGOUT_URL', nil))
+                   .gsub('{{UNIQUE_ID}}', "id-#{SecureRandom.uuid}")
+                   .gsub('{{ISSUE_INSTANT}}', Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%3NZ'))
+                   .gsub('{{NOT_ON_OR_AFTER}}', (Time.now.utc + 10).strftime('%Y-%m-%dT%H:%M:%S.%3NZ'))
+                   .gsub('{{SP_ENTITY_ID}}', ENV.fetch('SP_ENTITY_ID', nil))
+                   .gsub('{{ASSERTION_NAME_ID}}', session[:name_id])
+                   .gsub('{{REQUEST_UNIQUE_ID}}', session[:saml_request_id])
+
+    encoded_saml_request = encoded_saml_request(saml_request)
+
+    sig_alg = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
+    signature = sign_saml_request(encoded_saml_request, sig_alg)
+
+    redirect_url = "#{ENV.fetch('IDP_LOGOUT_URL',
+                                nil)}?SAMLRequest=#{encoded_saml_request}&SigAlg=#{CGI.escape(sig_alg)}&Signature=#{signature}"
+
+    [302, { 'Location' => redirect_url }, []]
+  end
+
+  def self.encoded_saml_request(saml_request)
+    deflated_request = Zlib::Deflate.deflate(saml_request, Zlib::BEST_COMPRESSION)
+    base64_request = Base64.strict_encode64(deflated_request)
+    CGI.escape(base64_request)
+  end
+
+  def self.sign_saml_request(encoded_saml_request, sig_alg)
+    private_key = OpenSSL::PKey::RSA.new(File.read('cert/private.key'))
+    string_to_sign = "SAMLRequest=#{encoded_saml_request}&SigAlg=#{CGI.escape(sig_alg)}"
+    signature = private_key.sign(OpenSSL::Digest.new('SHA256'), string_to_sign)
+
+    CGI.escape(Base64.strict_encode64(signature))
+  end
+
+  def self.handle_normal_logout(env)
+    session = env['rack.session']
+    session.clear
+    [302, { 'Location' => '/' }, []]
   end
 end

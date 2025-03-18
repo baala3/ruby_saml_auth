@@ -20,5 +20,5 @@ Router.draw do
   # protected routes
   get('/home') { |env| SessionHandler.handle_home(env) }
   get('/logout') { |env| SessionHandler.handle_logout(env) }
-  get('/logout/callback') { |env| SamlHandler.handle_logout_callback(env) }
+  get('/logout/saml') { |env| SamlHandler.handle_logout_request(env) }
 end
