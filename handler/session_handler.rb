@@ -14,6 +14,7 @@ class SessionHandler
                        .gsub('{{last_name}}', session[:last_name])
                        .gsub('{{name_id}}', session[:name_id])
                        .gsub('{{saml_request_id}}', session[:saml_request_id])
+                       .gsub('{{groups}}', session[:groups].join(', '))
 
     [200, { 'Content-Type' => 'text/html' }, [html_content]]
   end

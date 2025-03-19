@@ -81,41 +81,33 @@ module SamlHelper
   end
 
   def extract_and_store_user_attributes(saml_response, env)
+    session = env['rack.session']
     doc = Nokogiri::XML(saml_response)
-    assertion = doc.at_xpath('//saml:Assertion', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
+    attribute_statement = doc.at_xpath('//saml:AttributeStatement', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
 
-    # Extract NameID
-    name_id = assertion.at_xpath('.//saml:NameID', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.text
+    name_id = doc.at_xpath('//saml:NameID', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.text
+    session[:name_id] = name_id if name_id
 
-    attribute_statement = assertion.at_xpath('.//saml:AttributeStatement',
-                                             'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')
-
-    attributes = {
-      email: '',
-      first_name: '',
-      last_name: '',
-      name_id: name_id # Add NameID to attributes
-    }
+    attributes = {}
 
     attribute_statement&.xpath('.//saml:Attribute', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.each do |attr|
       name = attr['Name']
-      value = attr.at_xpath('.//saml:AttributeValue', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion')&.text
-
-      case name.downcase
-      when 'email', 'emailaddress', 'mail'
-        attributes[:email] = value
-      when 'firstname', 'givenname'
-        attributes[:first_name] = value
-      when 'lastname', 'surname'
-        attributes[:last_name] = value
-      end
+      values = attr.xpath('.//saml:AttributeValue', 'saml' => 'urn:oasis:names:tc:SAML:2.0:assertion').map(&:text)
+      attributes[name] = values.size == 1 ? values.first : values
     end
 
-    session = env['rack.session']
-    session[:email] = attributes[:email]
-    session[:first_name] = attributes[:first_name]
-    session[:last_name] = attributes[:last_name]
-    session[:name_id] = attributes[:name_id]
+    session[:email] = attributes['email'] || attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']
+    session[:first_name] = attributes['firstName'] || attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname']
+    session[:last_name] = attributes['lastName'] || attributes['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname']
+
+    groups = attributes['groups'] ||
+             attributes['memberOf'] ||
+             attributes['http://schemas.xmlsoap.org/claims/Group'] ||
+             attributes['http://schemas.microsoft.com/ws/2008/06/identity/claims/groups'] ||
+             []
+
+    groups = [groups] unless groups.is_a?(Array)
+    session[:groups] = groups
   end
 
   ## SLO Helpers

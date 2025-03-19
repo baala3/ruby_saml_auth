@@ -18,10 +18,10 @@ body {
   padding: 0;
   background: linear-gradient(
     -45deg,
-    rgba(238, 119, 82, 0.7),
-    rgba(241, 75, 33, 0.6),
-    rgba(35, 166, 213, 0.5),
-    rgba(35, 213, 171, 0.6)
+    rgba(238, 119, 82, 0.4),
+    rgba(241, 75, 33, 0.4),
+    rgba(35, 166, 213, 0.4),
+    rgba(35, 213, 171, 0.4)
   );
   background-size: 400% 400%;
   animation: gradient 30s ease infinite;
@@ -206,4 +206,19 @@ body {
   .button-base {
     width: 100%;
   }
+}
+
+.groups-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.groups-list span {
+  background: rgba(35, 166, 213, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #4a5568;
+  border: 1px solid rgba(35, 166, 213, 0.2);
 }
