@@ -59,7 +59,7 @@ class SamlHandler
 
     extract_and_store_user_attributes(saml_response, env)
 
-    [302, { 'Location' => '/home' }, []]
+    [302, { 'Location' => '/home?status=success' }, []]
   end
 
   def self.handle_logout_request(env)

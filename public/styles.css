@@ -222,3 +222,54 @@ body {
   color: #4a5568;
   border: 1px solid rgba(35, 166, 213, 0.2);
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: 8px;
+  background: rgba(72, 187, 120, 0.9);
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: slideIn 0.5s ease forwards, fadeOut 0.5s ease 3s forwards;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification.success {
+  background: rgba(72, 187, 120, 0.9);
+}
+
+.notification.error {
+  background: rgba(245, 101, 101, 0.9);
+}
+
+.notification-icon {
+  font-size: 1.2em;
+}

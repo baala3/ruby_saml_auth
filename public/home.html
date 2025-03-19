@@ -7,6 +7,42 @@
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <script>
+      window.onload = function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get("status");
+
+        if (status) {
+          showNotification(status);
+          // Remove notification from URL
+          window.history.replaceState({}, "", "/home");
+        }
+      };
+
+      function showNotification(status) {
+        const isSuccess = status === "success";
+        const notification = document.createElement("div");
+        notification.className = `notification ${
+          isSuccess ? "success" : "error"
+        }`;
+
+        const icon = isSuccess ? "✓" : "!";
+        const message = isSuccess
+          ? "Successfully logged in"
+          : "Oops, something went wrong";
+
+        notification.innerHTML = `
+          <span class="notification-icon">${icon}</span>
+          ${message}
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 3500);
+      }
+    </script>
     <div class="container">
       <div class="card">
         <div class="header">

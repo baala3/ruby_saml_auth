@@ -20,6 +20,7 @@ class SessionHandler
   end
 
   def self.handle_logout(env)
+    # TODO: validate slo response
     env['rack.session'].clear
     [302, { 'Location' => '/' }, []]
   end
