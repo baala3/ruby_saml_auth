@@ -6,8 +6,26 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <form action="/auth/saml" method="get">
-      <button type="submit" class="sso-button">SSO with SAML</button>
-    </form>
+    <div class="container">
+      <div class="card card-center">
+        <h1 class="title">SAML Integration Service Provider</h1>
+        <p class="description">
+          Welcome to the SAML SSO/SLO testing application. This service provider
+          allows you to test SAML-based Single Sign-On (SSO) and Single Logout
+          (SLO) functionality.
+        </p>
+        <ul class="info-list">
+          <li>Configure your application in Okta first</li>
+          <li>Test Single Sign-On (SSO) functionality</li>
+          <li>Test Single Logout (SLO) capability</li>
+          <li>View SAML assertions and attributes</li>
+        </ul>
+        <form action="/auth/saml" method="get" class="center-form">
+          <button type="submit" class="button-base sso-button">
+            Initiate SAML SSO
+          </button>
+        </form>
+      </div>
+    </div>
   </body>
 </html>
