@@ -11,6 +11,7 @@ Router.draw do
   get('/') { StaticFileHandler.serve_file('public/index.html', 'text/html') }
   get('/styles.css') { StaticFileHandler.serve_file('public/styles.css', 'text/css') }
   get('/favicon.svg') { StaticFileHandler.serve_file('public/favicon.svg', 'image/svg+xml') }
+  get('/js/notifications.js') { StaticFileHandler.serve_file('public/js/notifications.js', 'application/javascript') }
 
   # SAML routes
   get('/auth/saml') { |env| SamlHandler.handle_auth_request(env) }

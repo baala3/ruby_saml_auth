@@ -5,44 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome - SAML Authentication</title>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script src="/js/notifications.js"></script>
   </head>
   <body>
-    <script>
-      window.onload = function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get("status");
-
-        if (status) {
-          showNotification(status);
-          // Remove notification from URL
-          window.history.replaceState({}, "", "/home");
-        }
-      };
-
-      function showNotification(status) {
-        const isSuccess = status === "success";
-        const notification = document.createElement("div");
-        notification.className = `notification ${
-          isSuccess ? "success" : "error"
-        }`;
-
-        const icon = isSuccess ? "✓" : "!";
-        const message = isSuccess
-          ? "Successfully logged in"
-          : "Oops, something went wrong";
-
-        notification.innerHTML = `
-          <span class="notification-icon">${icon}</span>
-          ${message}
-        `;
-
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-          notification.remove();
-        }, 3500);
-      }
-    </script>
     <div class="container">
       <div class="card">
         <div class="header">
@@ -90,5 +56,20 @@
         </div>
       </div>
     </div>
+
+    <script>
+      // Display user attributes
+      fetch("/user_attributes")
+        .then((response) => response.json())
+        .then((data) => {
+          const attributesDiv = document.getElementById("attributes");
+          Object.entries(data).forEach(([key, value]) => {
+            const p = document.createElement("p");
+            p.innerHTML = `<strong>${key}:</strong> ${value}`;
+            attributesDiv.appendChild(p);
+          });
+        })
+        .catch((error) => console.error("Error:", error));
+    </script>
   </body>
 </html>

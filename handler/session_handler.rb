@@ -21,7 +21,11 @@ class SessionHandler
 
   def self.handle_logout(env)
     # TODO: validate slo response
+    request = Rack::Request.new(env)
     env['rack.session'].clear
-    [302, { 'Location' => '/' }, []]
+
+    message = request.params['slo'] == 'true' ? 'Successfully logged out from IDp and SP' : 'Successfully logged out from SP'
+
+    [302, { 'Location' => "/?status=success&message=#{URI.encode_www_form_component(message)}" }, []]
   end
 end
