@@ -39,6 +39,19 @@ body {
   width: 100%;
 }
 
+@keyframes cardFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    backdrop-filter: blur(10px);
+  }
+}
+
 .card {
   background: rgba(255, 255, 255, 0.8);
   border-radius: 16px;
@@ -48,6 +61,8 @@ body {
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 2rem;
+  animation: cardFadeIn 0.5s ease-out forwards;
+  will-change: transform, opacity, backdrop-filter;
 }
 
 .card-center {

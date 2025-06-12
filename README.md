@@ -18,7 +18,7 @@ git clone https://github.com/your-repo/saml-sso-ruby.git
 cd saml-sso-ruby
 ```
 
-2. Install Dependencies with `make setup`.
+2. Install Dependencies with `make puma-dev`.
 3. Load & configure Environment Variables `touch .env && cat .env.example > .env`
 4. Create IDP on okta developer dashboard
 
