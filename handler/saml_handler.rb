@@ -36,7 +36,7 @@ class SamlHandler
 
   def self.handle_acs(env)
     form_data = URI.decode_www_form(env['rack.input'].read).to_h
-    return [400, { 'Content-Type' => 'text/html' }, ['SAMLResponse not found']] unless log_saml_response(form_data)
+    return [400, { 'Content-Type' => 'text/html' }, ['SAMLResponse not found']] unless form_data.key?('SAMLResponse')
 
     # Get the base64 decoded SAML response
     saml_response = Base64.decode64(form_data['SAMLResponse'])
@@ -57,6 +57,9 @@ class SamlHandler
     validate_saml_response(saml_response, File.read('./cert/certificate.crt'))
 
     extract_and_store_user_attributes(saml_response, env)
+
+    # for debugging purposes
+    log_saml_response(saml_response)
 
     [302, { 'Location' => '/home?status=success&message=Successfully+logged+in' }, []]
   end

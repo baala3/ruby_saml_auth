@@ -2,16 +2,9 @@
 
 module SamlHelper
   ## SSO Helpers
-  def log_saml_response(form_data)
-    if form_data.key?('SAMLResponse')
-      decoded_response = Base64.decode64(form_data['SAMLResponse'])
-      doc = Nokogiri::XML(decoded_response).to_xml(indent: 2)
-      File.write('xml/saml_response.xml', doc)
-      true
-    else
-      File.write('xml/saml_response.xml', 'No SAMLResponse found in the request')
-      false
-    end
+  def log_saml_response(saml_response)
+    doc = Nokogiri::XML(saml_response).to_xml(indent: 2)
+    File.write('xml/saml_response.xml', doc)
   end
 
   def decrypt_assertion(saml_response, private_key_path)
